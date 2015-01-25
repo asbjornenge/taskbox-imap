@@ -15,15 +15,12 @@ var Imap = require('./imap')
 var imap = new Imap(args)
 
 imap.on('ready', function() {
-    console.log('outer ready')
-
     imap.once('mailbox-open', function(box) {
         imap.fetchSequence(1,box.messages.total, function(messages) {
             console.log('MESSAGES', Object.keys(messages).length)
+//          imap.startMailBoxStream(box.name)
         })
-        imap.startMailBoxStream(box.name)
     })
-
     imap.openMailBox('INBOX')
 })
 
