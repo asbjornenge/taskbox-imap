@@ -19,7 +19,7 @@ imap.on('ready', function() {
 
     imap.once('mailbox-open', function(box) {
         imap.fetchSequence(1,box.messages.total, function(messages) {
-            console.log(messages)
+            console.log('MESSAGES', Object.keys(messages).length)
         })
         imap.startMailBoxStream(box.name)
     })

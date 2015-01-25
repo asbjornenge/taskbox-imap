@@ -2,6 +2,7 @@ var Imap    = require('imap')
 var _       = require('lodash')    
 var inspect = require('util').inspect
 var EventEmitter = require('events').EventEmitter
+var MailParser   = require('mailparser').MailParser
 
 var imap = function(cred) {
     this.cred = cred
@@ -62,18 +63,16 @@ imap.prototype = _.assign(EventEmitter.prototype, {
         }
 
         var f = this.connection.seq.fetch(first+':'+last, {
-            bodies : ['HEADER.FIELDS (FROM TO SUBJECT DATE)','TEXT'],
+            bodies : '',
             struct : true
         })
 
         f.on('message', function(msg, seqno) {
-            var message = {}
+            var message = { seqno : seqno }
+            var parser  = new MailParser()
 
             msg.on('body', function(stream, info) {
-                _this.extractMailBody(stream, info, function(body) {
-                    if (info.which.indexOf('HEADER') == 0) message.headers = Imap.parseHeader(body)
-                    if (info.which.indexOf('TEXT')   == 0) message.text    = body
-                })
+                stream.on('data', function(chunk) { parser.write(chunk) })
             })
 
             msg.once('attributes', function(attrs) {
@@ -81,19 +80,19 @@ imap.prototype = _.assign(EventEmitter.prototype, {
             });
 
             msg.once('end', function() {
-                messages[message.uid] = message
+                parser.end()
+            })
+
+            parser.on('end', function(mail) {
+                mail.seqno = message.seqno
+                mail.uid   = message.uid
+                messages[message.uid] = mail
                 check_finished()
             })
 
         })
 
     },
-
-    extractMailBody : function(stream, info, callback) {
-        var buffer = ''
-        stream.on('data', function(chunk) { buffer += chunk.toString('utf-8') })
-        stream.once('end', function() { callback(buffer) })
-    }
 
 })
 

@@ -11,6 +11,7 @@
   "dependencies": {
     "imap": "^0.8.14",
     "lodash": "^2.4.1",
+    "mailparser": "^0.4.8",
     "minimist": "^1.1.0"
   }
 }
