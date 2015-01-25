@@ -13,6 +13,9 @@ var Imap     = require('./imap')
 var imap     = new Imap(args)
 var Firebase = require('./firebase')
 var firebase = new Firebase(args)
+args.taskbox = require('js-md5')(args.user)
+
+console.log(args)
 
 firebase.on('ready', function() {
     imap.on('ready', function() {
