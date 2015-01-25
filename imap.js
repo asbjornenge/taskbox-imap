@@ -1,5 +1,6 @@
-var Imap = require('imap')
-var _    = require('lodash')
+var Imap    = require('imap')
+var _       = require('lodash')    
+var inspect = require('util').inspect
 var EventEmitter = require('events').EventEmitter
 
 var imap = function(cred) {
@@ -32,21 +33,66 @@ imap.prototype = _.assign(EventEmitter.prototype, {
         this.connection.connect()
     },
 
-    startMailBoxStream : function(box) {
+    openMailBox : function(box, callback) {
         this.connection.openBox(box, true, function(err, box) {
-            if (err) throw err
-            
-
-            this.connection.on('mail', function(msg, seq) {
-                console.log('new mail',msg)
-            })
-
-            this.connection.on('expunge', function() {
-                console.log('expunge')
-                console.log(arguments)
-            })
-
+            if (err) throw err    
+            this.box = box
+            this.emit('mailbox-open', box)
+            if (typeof callback == 'function') callback()
         }.bind(this))
+    },
+
+    startMailBoxStream : function(box) {
+        this.connection.on('mail', function(msg, seq) {
+            console.log('new mail',msg)
+        })
+
+        this.connection.on('expunge', function() {
+            console.log('expunge')
+            console.log(arguments)
+        })
+    },
+
+    fetchSequence : function(first, last, callback) {
+        var _this = this
+        var messages = {}
+
+        var check_finished = function() {
+            if (Object.keys(messages).length == last) callback(messages)
+        }
+
+        var f = this.connection.seq.fetch(first+':'+last, {
+            bodies : ['HEADER.FIELDS (FROM TO SUBJECT DATE)','TEXT'],
+            struct : true
+        })
+
+        f.on('message', function(msg, seqno) {
+            var message = {}
+
+            msg.on('body', function(stream, info) {
+                _this.extractMailBody(stream, info, function(body) {
+                    if (info.which.indexOf('HEADER') == 0) message.headers = Imap.parseHeader(body)
+                    if (info.which.indexOf('TEXT')   == 0) message.text    = body
+                })
+            })
+
+            msg.once('attributes', function(attrs) {
+                message.uid = attrs.uid
+            });
+
+            msg.once('end', function() {
+                messages[message.uid] = message
+                check_finished()
+            })
+
+        })
+
+    },
+
+    extractMailBody : function(stream, info, callback) {
+        var buffer = ''
+        stream.on('data', function(chunk) { buffer += chunk.toString('utf-8') })
+        stream.once('end', function() { callback(buffer) })
     }
 
 })
