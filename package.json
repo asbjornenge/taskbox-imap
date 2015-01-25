@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "imap": "^0.8.14"
+    "imap": "^0.8.14",
+    "lodash": "^2.4.1",
+    "minimist": "^1.1.0"
   }
 }
