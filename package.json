@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "firebase": "^2.1.1",
     "imap": "^0.8.14",
     "lodash": "^2.4.1",
     "mailparser": "^0.4.8",

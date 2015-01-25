@@ -9,19 +9,21 @@ var args = require('minimist')(process.argv.slice(2), {
     }
 })
 
-console.log(args)
+var Imap     = require('./imap')
+var imap     = new Imap(args)
+var Firebase = require('./firebase')
+var firebase = new Firebase(args)
 
-var Imap = require('./imap')
-var imap = new Imap(args)
-
-imap.on('ready', function() {
-    imap.once('mailbox-open', function(box) {
-        imap.fetchSequence(1,box.messages.total, function(messages) {
-            console.log('MESSAGES', Object.keys(messages).length)
-//          imap.startMailBoxStream(box.name)
+firebase.on('ready', function() {
+    imap.on('ready', function() {
+        imap.once('mailbox-open', function(box) {
+            imap.fetchSequence(1,box.messages.total, function(messages) {
+                console.log('MESSAGES', Object.keys(messages).length)
+//              imap.startMailBoxStream(box.name)
+            })
         })
+        imap.openMailBox('INBOX')
     })
-    imap.openMailBox('INBOX')
+    imap.connect()
 })
-
-imap.connect()
+firebase.connect()

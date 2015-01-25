@@ -1,6 +1,6 @@
-var Imap    = require('imap')
-var _       = require('lodash')    
-var inspect = require('util').inspect
+var Imap         = require('imap')
+var _            = require('lodash')    
+var inspect      = require('util').inspect
 var EventEmitter = require('events').EventEmitter
 var MailParser   = require('mailparser').MailParser
 
@@ -8,7 +8,7 @@ var imap = function(cred) {
     this.cred = cred
     this.connection = null
 }
-imap.prototype = _.assign(EventEmitter.prototype, {
+imap.prototype = _.assign({
 
     connect : function() {
         this.connection = new Imap({
@@ -94,7 +94,7 @@ imap.prototype = _.assign(EventEmitter.prototype, {
 
     },
 
-})
+}, EventEmitter.prototype)
 
 
 
