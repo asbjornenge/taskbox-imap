@@ -18,6 +18,7 @@ firebase.prototype = _.assign({
     },
 
     addSequenceToTaskBox : function(messages) {
+        console.log('Adding sequence to firebase')
         Object.keys(messages).forEach(function(uid) {
             this.addToTaskBox(messages[uid])
         }.bind(this))
@@ -26,6 +27,10 @@ firebase.prototype = _.assign({
     addToTaskBox : function(message) {
         this.root.child(this.taskbox).child(message.uid).set(message)
     },
+
+    delFromTaskBox : function(uid) {
+        this.root.child(this.taskbox).child(uid).remove()
+    }
 
 }, EventEmitter.prototype)
 

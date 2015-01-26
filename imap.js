@@ -40,26 +40,28 @@ imap.prototype = _.assign({
             this.box = box
             this.emit('mailbox-open', box)
             if (typeof callback == 'function') callback()
+            console.log('TOTAL',box.messages.total)
         }.bind(this))
     },
 
     startMailBoxStream : function(box) {
-        this.connection.on('mail', function(msg, seq) {
-            console.log('new mail',msg)
-        })
+        this.connection.on('mail', function(numNewMessages) {
+            this.emit('mail-added', { box : this.box, numNewMessages: numNewMessages })
+        }.bind(this))
 
-        this.connection.on('expunge', function() {
-            console.log('expunge')
-            console.log(arguments)
-        })
+        this.connection.on('expunge', function(seqno) {
+            this.emit('mail-removed', { box : this.box, seqno : seqno })
+        }.bind(this))
     },
 
     fetchSequence : function(first, last, callback) {
-        var _this = this
-        var messages = {}
+        console.log('fetching sequence',first,last)
+        var _this       = this
+        var messages    = {}
+        var numMessages = (last-first)+1
 
         var check_finished = function() {
-            if (Object.keys(messages).length == last) callback(messages)
+            if (Object.keys(messages).length == numMessages) callback(messages)
         }
 
         var f = this.connection.seq.fetch(first+':'+last, {
