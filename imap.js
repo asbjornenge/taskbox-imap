@@ -40,7 +40,6 @@ imap.prototype = _.assign({
             this.box = box
             this.emit('mailbox-open', box)
             if (typeof callback == 'function') callback()
-            console.log('TOTAL',box.messages.total)
         }.bind(this))
     },
 
@@ -89,7 +88,6 @@ imap.prototype = _.assign({
             })
 
             parser.on('end', function(mail) {
-                console.log('got message',message)
                 mail.seqno = message.seqno
                 mail.uid   = message.uid
                 if (mail.attachments) mail.attachments.forEach(function(attachment) { delete attachment.stream })

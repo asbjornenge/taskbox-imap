@@ -22,10 +22,9 @@ var state = {
     totalNumMessage : 0
 }
 
+// TODO: Move these to utils ?
 var updateMessagesStateAndAddToTaskBox = function(messages) {
-    console.log(Object.keys(state.messages), Object.keys(messages))
     _.assign(state.messages,messages) 
-    console.log(Object.keys(state.messages))
     firebase.addSequenceToTaskBox(messages)
 }
 var updateMessagesStateAndDelFromTaskBox = function(info) {
@@ -36,6 +35,7 @@ var updateMessagesStateAndDelFromTaskBox = function(info) {
 }
 
 firebase.on('ready', function() {
+    firebase.reset() // <- Start with a blank slate - ONLY FOR TESTING! Implement proper sync later
     imap.on('ready', function() {
         imap.once('mailbox-open', function(box) {
             state.totalNumMessages = box.messages.total
