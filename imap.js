@@ -69,7 +69,10 @@ imap.prototype = _.assign({
 
         f.on('message', function(msg, seqno) {
             var message = { seqno : seqno }
-            var parser  = new MailParser()
+            var parser  = new MailParser({
+                streamAttachments   : true,
+                showAttachmentLinks : true
+            })
 
             msg.on('body', function(stream, info) {
                 stream.on('data', function(chunk) { parser.write(chunk) })
@@ -84,8 +87,10 @@ imap.prototype = _.assign({
             })
 
             parser.on('end', function(mail) {
+                console.log('got message',message)
                 mail.seqno = message.seqno
                 mail.uid   = message.uid
+                if (mail.attachments) mail.attachments.forEach(function(attachment) { delete attachment.stream })
                 messages[message.uid] = mail
                 check_finished()
             })
@@ -95,40 +100,5 @@ imap.prototype = _.assign({
     },
 
 }, EventEmitter.prototype)
-
-
-
-//imap.once('ready', function() {
-//    console.log('ready')
-//
-//    imap.openBox('INBOX',true, function(err, box) {
-//        if (err) throw err
-//        var f = imap.seq.fetch('1:30',{
-//            bodies : 'HEADER.FIELDS (FROM TO SUBJECT DATE)',
-//            struct : true
-//        })
-//
-//        f.on('message', function(msg,seqno) {
-//            console.log('Message nr#%d',seqno)
-//        })
-//
-//        imap.on('mail', function() {
-//            console.log('new mail')
-//            console.log(arguments)
-//        })
-//
-//        imap.on('expunge', function() {
-//            console.log('expunge')
-//            console.log(arguments)
-//        })
-//
-//        imap.on('update', function() {
-//            console.log('update')
-//            console.log(arguments)
-//        })
-//
-//    })
-//
-//})
 
 module.exports = imap

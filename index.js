@@ -20,11 +20,8 @@ console.log(args)
 firebase.on('ready', function() {
     imap.on('ready', function() {
         imap.once('mailbox-open', function(box) {
-            imap.fetchSequence(1,box.messages.total, function(messages) {
-                console.log('MESSAGES', Object.keys(messages).length)
-                firebase.addToTaskBox(messages[Object.keys(messages)[0]])
+            imap.fetchSequence(1,box.messages.total, firebase.addSequenceToTaskBox.bind(firebase))
 //              imap.startMailBoxStream(box.name)
-            })
         })
         imap.openMailBox('INBOX')
     })
