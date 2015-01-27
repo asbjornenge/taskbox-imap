@@ -18,7 +18,7 @@ firebase.prototype = _.assign({
     },
 
     reset : function() {
-        this.root.child(this.taskbox).remove()
+        this.root.child('taskbox').remove()
     },
 
     addSequenceToTaskBox : function(messages) {
@@ -28,11 +28,13 @@ firebase.prototype = _.assign({
     },
 
     addToTaskBox : function(message) {
-        this.root.child(this.taskbox).child(message.uid).set(message)
+        console.log('Adding to firebase',message.uid)
+        this.root.child('taskbox').child(this.taskbox+'_'+message.uid).set(message)
     },
 
     delFromTaskBox : function(uid) {
-        this.root.child(this.taskbox).child(uid).remove()
+        console.log('Removing from firebase', uid)
+        this.root.child('taskbox').child(this.taskbox+'_'+uid).remove()
     }
 
 }, EventEmitter.prototype)

@@ -18,19 +18,26 @@ var firebase = new Firebase(args)
 
 console.log(args)
 var state = {
-    messages        : {},
-    totalNumMessage : 0
+    messages         : {},
+    totalNumMessages : 0
 }
 
 // TODO: Move these to utils ?
 var updateMessagesStateAndAddToTaskBox = function(messages) {
-    _.assign(state.messages,messages) 
+    _.assign(state.messages,messages)
+    state.totalNumMessages = Object.keys(state.messages).length 
     firebase.addSequenceToTaskBox(messages)
 }
 var updateMessagesStateAndDelFromTaskBox = function(info) {
     var id = _.findKey(state.messages, { seqno : info.seqno })
+    console.log('Removing id',id)
     if (!id) return // <- sync?
+    Object.keys(state.messages).forEach(function(uid) {
+        var msg = state.messages[uid]
+        if (msg.seqno > info.seqno) msg.seqno -= 1
+    })
     delete state.messages[id]
+    state.totalNumMessages = Object.keys(state.messages).length
     firebase.delFromTaskBox(id)
 }
 
