@@ -18,7 +18,11 @@ firebase.prototype = _.assign({
     },
 
     reset : function() {
-        this.root.child('taskbox').remove()
+        this.root.child('taskbox').once('value', function(snap) {
+            Object.keys(snap.val()).forEach(function(uid) {
+                if (uid.indexOf(this.taskbox) == 0) this.root.child('taskbox').child(uid).remove()
+            }.bind(this))
+        }.bind(this))
     },
 
     addSequenceToTaskBox : function(messages) {
