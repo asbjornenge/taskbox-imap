@@ -22,7 +22,8 @@ var state = {
     totalNumMessages : 0
 }
 
-// TODO: Move these to utils ?
+// TODO: Move these to utils ? <- YES!
+// TODO: BUG: Fails if mailbox empty - tries to fetch sequence 1:0
 var updateMessagesStateAndAddToTaskBox = function(messages) {
     _.assign(state.messages,messages)
     state.totalNumMessages = Object.keys(state.messages).length 
@@ -42,6 +43,7 @@ var updateMessagesStateAndDelFromTaskBox = function(info) {
 }
 
 firebase.on('ready', function() {
+    console.log('firebase ready')
     firebase.reset() // <- Start with a blank slate - ONLY FOR TESTING! Implement proper sync later
     imap.on('ready', function() {
         imap.once('mailbox-open', function(box) {
@@ -57,6 +59,8 @@ firebase.on('ready', function() {
         })
         imap.openMailBox('INBOX')
     })
-    imap.connect()
+    setTimeout(function() {
+        imap.connect()
+    },1000)
 })
 firebase.connect()
